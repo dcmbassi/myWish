@@ -18,10 +18,25 @@ const userSchema = mongoose.Schema({
         type: String,
         required: [true, 'Please enter a password']
     },
-    friends: [{userId: mongoose.Schema.Types.ObjectId}],
-    requested: [{userId: mongoose.Schema.Types.ObjectId}],
-    pending: [{userId: mongoose.Schema.Types.ObjectId}],
-    taggedItems: [{userId: mongoose.Schema.Types.ObjectId}]
+    friends: [{userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+        }
+    }],
+    following: [{userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+        }
+    }],
+    followers: [{userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+        }
+    }],
+    taggedItems: [{wishId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Wish'
+        }}]
 }, {
     timestamps: true
 })

@@ -45,9 +45,65 @@ const addNewWish = asyncHandler(async (req, res) => {
     }
 })
 
+/*
+  @desc     Update user wish
+  @route    PUT /api/wishes/:wishID
+  @access   Private
+*/
+const updateWish = asyncHandler(async (req, res) => {
+    const wish = await Wish.findById(req.params.wishId)
+
+    if (!wish) {
+        res.status(400)
+        throw new Error('Wish not found')
+    }
+
+    if (!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    if (wish.owner.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorised')
+    }
+
+    const updatedWish = await Wish.findByIdAndUpdate(req.params.wishId, req.body, {new: true})
+    res.status(200).json(updatedWish)
+})
+
+/*
+  @desc     Delete user wish
+  @route    DELEtE /api/wishes/:wishID
+  @access   Private
+*/
+const deleteWish = asyncHandler(async (req, res) => {
+    const wish = await Wish.findById(req.params.wishId)
+
+    if (!wish) {
+        res.status(400)
+        throw new Error('Wish not found')
+    }
+
+    if (!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    if (wish.owner.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorised')
+    }
+
+    await wish.remove()
+    res.status(200).json({wishId: req.params.wishId})
+})
+
 
 module.exports = {
     fetchMyWishList,
     fetchFriendWishList,
-    addNewWish
+    addNewWish,
+    updateWish,
+    deleteWish
 }
