@@ -89,7 +89,7 @@ const followUser = asyncHandler(async (req, res) => {
     const target = await User.findById(req.params.userId)
     if (!target) {
         res.status(400)
-        throw new Error('Targer user not found')
+        throw new Error('Target user not found')
     }
 
     const user = await User.findById(req.user.id)

@@ -28,7 +28,7 @@ const fetchFriendWishList = asyncHandler(async (req, res) => {
   @access   Private
 */
 const addNewWish = asyncHandler(async (req, res) => {
-    const {name, description, price} = req.body
+    const {name, description, minPrice, maxPrice} = req.body
 
     if (!name) {
         res.status(400)
@@ -37,7 +37,7 @@ const addNewWish = asyncHandler(async (req, res) => {
         const wish = await Wish.create({
             name,
             description,
-            price,
+            priceRange: [minPrice, maxPrice],
             owner: req.user.id
         })
 
@@ -51,9 +51,7 @@ const addNewWish = asyncHandler(async (req, res) => {
   @access   Private
 */
 const updateWish = asyncHandler(async (req, res) => {
-    const wish = await Wish.findById(req.params.wishId)
-
-    if (!wish) {
+    if (!req.wish) {
         res.status(400)
         throw new Error('Wish not found')
     }
@@ -61,11 +59,6 @@ const updateWish = asyncHandler(async (req, res) => {
     if (!req.user) {
         res.status(401)
         throw new Error('User not found')
-    }
-
-    if (wish.owner.toString() !== req.user.id) {
-        res.status(401)
-        throw new Error('User not authorised')
     }
 
     const updatedWish = await Wish.findByIdAndUpdate(req.params.wishId, req.body, {new: true})
@@ -78,9 +71,7 @@ const updateWish = asyncHandler(async (req, res) => {
   @access   Private
 */
 const deleteWish = asyncHandler(async (req, res) => {
-    const wish = await Wish.findById(req.params.wishId)
-
-    if (!wish) {
+    if (!req.wish) {
         res.status(400)
         throw new Error('Wish not found')
     }
@@ -90,13 +81,8 @@ const deleteWish = asyncHandler(async (req, res) => {
         throw new Error('User not found')
     }
 
-    if (wish.owner.toString() !== req.user.id) {
-        res.status(401)
-        throw new Error('User not authorised')
-    }
-
-    await wish.remove()
-    res.status(200).json({wishId: req.params.wishId})
+    await req.wish.remove()
+    res.status(200).json({deletedWishId: req.params.wishId})
 })
 
 

@@ -19,6 +19,10 @@ const wishSchema = mongoose.Schema({
         type: String,
         default: 'public'
     },
+    isAcquired: {
+        type: Boolean,
+        default: false
+    },
     tags: {
         type: Number,
         default: 0
