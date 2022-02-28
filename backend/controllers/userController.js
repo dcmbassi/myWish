@@ -11,14 +11,12 @@ const User = require('../models/userModel')
 */
 const registerUser = asyncHandler(async (req, res) => {
     const {firstName, lastName, email, password} = req.body
-
     if (!lastName || !email || !password) {
         res.status(400)
         throw new Error('Please add all required fields.')
     }
 
     const userExists = await User.findOne({email})
-
     if (userExists) {
         res.status(400)
         throw new Error('User already exists')
@@ -48,6 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 })
 
+
 /*
   @desc     Login user
   @route    POST /api/users/login
@@ -55,14 +54,12 @@ const registerUser = asyncHandler(async (req, res) => {
 */
 const loginUser = asyncHandler(async (req, res) => {
     const {email, password} = req.body
-
     if (!email || !password) {
         res.status(400)
         throw new Error('Please add all required fields.')
     }
 
     const user = await User.findOne({email})
-
     if (user && (await bcrypt.compare(password, user.password))) {
         res.status(200).json({
             _id: user.id,
@@ -77,19 +74,19 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 })
 
+
 /*
   @desc     Add target user to following list and add self to target follower list
   @route    POST /api/users/follow/:userId
   @access   Private
 */
 const followUser = asyncHandler(async (req, res) => {
-    const target = await User.findById(req.params.userId)
-
     if (!req.user) {
         res.status(401)
         throw new Error('User not authorised')
     }
-
+    
+    const target = await User.findById(req.params.userId)
     if (!target) {
         res.status(400)
         throw new Error('Targer user not found')
@@ -97,7 +94,7 @@ const followUser = asyncHandler(async (req, res) => {
 
     const user = await User.findById(req.user.id)
 
-    if (user.following.some(followed => followed.id === target.id)) {
+    if (user.following.includes(target.id)) {
         res.status(400)
         throw new Error('You already follow this user')
     }
@@ -105,7 +102,7 @@ const followUser = asyncHandler(async (req, res) => {
     user.following.push(target.id)
     user.save()
 
-    if (!target.followers.some(follower => follower.id === req.user.id)) {
+    if (!target.followers.includes(req.user.id)) {
         target.followers.push(req.user.id)
         target.save()
     }
@@ -113,8 +110,9 @@ const followUser = asyncHandler(async (req, res) => {
     res.status(200).send({followed: user.following.slice(-1)[0]})
 })
 
+
 /*
-  @desc     Add target user to following list and add self to target follower list
+  @desc     Remove all entries from following list and remove self from all follower lists
   @route    POST /api/users/unfollow
   @access   Private
 */
@@ -128,7 +126,7 @@ const unfollowAll = asyncHandler(async (req, res) => {
     
     const result = await User.updateMany({'_id': { $in:  user.following}}, {
         $pullAll: {
-            followers: [{_id: user.id}]
+            followers: [user.id]
         }
     })
     
@@ -148,8 +146,9 @@ const unfollowAll = asyncHandler(async (req, res) => {
     res.status(200).json({message: 'Success'})
 })
 
+
 /*
-  @desc     Add target user to following list and add self to target follower list
+  @desc     Remove target user from following list and remove self from target follower list
   @route    POST /api/users/unfollow/:userId
   @access   Private
 */
@@ -159,10 +158,9 @@ const unfollowOne = asyncHandler(async (req, res) => {
         throw new Error('User not authorised')
     }
     
-    
     const result = await User.updateOne({'_id': req.params.userId}, {
         $pullAll: {
-            followers: [{_id: req.user.id}]
+            followers: [req.user.id]
         }
     })
     
@@ -178,18 +176,20 @@ const unfollowOne = asyncHandler(async (req, res) => {
 
     const pulled = await User.updateOne({'_id': req.user.id}, {
         $pullAll: {
-            following: [{_id: req.params.userId}]
+            following: [req.params.userId]
         }
     })
 
     res.status(200).json({unfollowed: req.params.userId})
 })
 
+
 const generateToken = (id) => {
     return jwt.sign({id}, process.env.JWT_SECRET, {
         expiresIn: '30d'
     })
 }
+
 
 module.exports = {
     registerUser,

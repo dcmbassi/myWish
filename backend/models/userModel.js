@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const userSchema = mongoose.Schema({
     firstName:  {
         type: String
@@ -18,25 +17,22 @@ const userSchema = mongoose.Schema({
         type: String,
         required: [true, 'Please enter a password']
     },
-    friends: [{userId: {
+    closeFriends: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-        }
     }],
-    following: [{userId: {
+    following: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-        }
     }],
-    followers: [{userId: {
+    followers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-        }
     }],
-    taggedItems: [{wishId: {
+    taggedItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Wish'
-        }}]
+    }]
 }, {
     timestamps: true
 })

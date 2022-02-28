@@ -16,6 +16,9 @@ const verifyToken = asyncHandler(async (req, res, next) => {
             res.status(401)
             throw new Error('Not authorised')
         }
+    } else {
+        res.status(401)
+        throw new Error('Unauthorised: no token supplied')
     }
 })
 

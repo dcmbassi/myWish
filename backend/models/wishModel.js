@@ -9,11 +9,19 @@ const wishSchema = mongoose.Schema({
     description: {
         type: String
     },
-    price: {
+    priceRange: [{
         type: Number
+    }],
+    deadline: {
+        type: Date
+    },
+    visibility: {
+        type: String,
+        default: 'public'
     },
     tags: {
-        type: Number
+        type: Number,
+        default: 0
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
