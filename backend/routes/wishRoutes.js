@@ -3,7 +3,9 @@ const { fetchMyWishList, fetchFriendWishList, addNewWish, updateWish, deleteWish
 const {verifyToken, verifyWishOwnership} = require('../middleware/authMiddleware')
 const router = express.Router()
 
-router.route('/').get(verifyToken, fetchMyWishList).post(verifyToken, addNewWish)
+router.route('/')
+    .get(verifyToken, fetchMyWishList)
+    .post(verifyToken, addNewWish)
 
 router.route('/:wishId')
     .put(verifyToken, verifyWishOwnership, updateWish)
