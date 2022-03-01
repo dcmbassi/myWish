@@ -92,6 +92,11 @@ const followUser = asyncHandler(async (req, res) => {
         throw new Error('Target user not found')
     }
 
+    if (target.id === req.user.id) {
+        res.status(400)
+        throw new Error('Cannot follow self')
+    }
+
     const user = await User.findById(req.user.id)
 
     if (user.following.includes(target.id)) {
