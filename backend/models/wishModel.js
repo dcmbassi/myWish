@@ -23,10 +23,10 @@ const wishSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    tags: {
-        type: Number,
-        default: 0
-    },
+    taggedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
