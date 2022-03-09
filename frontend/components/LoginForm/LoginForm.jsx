@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/router";
 import { useAuth } from "../../context/authContext"
 
@@ -7,7 +7,11 @@ const LoginForm = () => {
     const [password, setPassword] = useState('')
 
     const router = useRouter()
-    const {user, login} = useAuth()
+    const {user, login, isLoggedIn} = useAuth()
+
+    useEffect(() => {
+        user?.email && router.push('/dashboard')
+    }, [user])
 
     const handleLogin = (e) => {
         e.preventDefault()
@@ -16,7 +20,8 @@ const LoginForm = () => {
             login(email, password)
             setEmail('')
             setPassword('')
-            router.push('/dashboard')
+            console.log({user});
+            if (isLoggedIn) router.push('/dashboard')
         }
     }
 
