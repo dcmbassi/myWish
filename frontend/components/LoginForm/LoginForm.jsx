@@ -20,7 +20,6 @@ const LoginForm = () => {
             login(email, password)
             setEmail('')
             setPassword('')
-            console.log({user});
             if (isLoggedIn) router.push('/dashboard')
         }
     }
