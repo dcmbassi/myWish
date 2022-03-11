@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [token, setToken, clearToken] = useLocalStorage('token')
+    const [storedUser, setStoredUser, clearStoredUser] = useLocalStorage('user')
 
     const login = async (email, password) => {
         setLoading(true)
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
             const {data} = await axios.post(loginURL, { email, password })
             const fetchedUser = {id: data._id, firstName: data.firstName, lastName: data.lastName, email: data.email}
             setUser(fetchedUser)
-            setToken(data.token)
+            setStoredUser(data)
             setIsLoggedIn(true)
             setLoading(false)
         } catch (error) {
@@ -28,12 +28,18 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const logout = () => {
+        setIsLoggedIn(false)
+        setUser(null)
+        clearStoredUser()
+    }
+
     const value = {
         user,
         login,
+        logout,
         loading,
         isLoggedIn,
-        token
     }
 
     return (

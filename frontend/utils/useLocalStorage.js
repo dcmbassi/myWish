@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const PREFIX = 'genie-next-client'
+const PREFIX = 'genie-next-client-'
 
 const useLocalStorage = (key, initialValue) => {
     const prefixedKey = PREFIX + key
@@ -9,7 +9,7 @@ const useLocalStorage = (key, initialValue) => {
         let jsonValue
         if (typeof window !== 'undefined') {
             jsonValue = localStorage.getItem(prefixedKey)
-            if (jsonValue) return jsonValue
+            if (jsonValue) return JSON.parse(jsonValue)
             if (typeof initialValue === 'function') return initialValue()
             else return initialValue
         }

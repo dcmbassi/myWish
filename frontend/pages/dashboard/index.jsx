@@ -1,13 +1,22 @@
+import { useRouter } from "next/router"
+import { useEffect } from "react"
 import { useAuth } from "../../context/authContext"
 
-const index = () => {
-  const {user} = useAuth()
+const Dashboard = () => {
+  const { user, logout } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!user) router.push('/login')
+  }, [user])
   return (
     <>
-        <h1>Dashboard</h1>
-        <p>{`Welcome, ${user.firstName} ${user.lastName}`}</p>
+      <h1>Dashboard</h1>
+      <p>{`Welcome, ${user?.firstName} ${user?.lastName}`}</p>
+      <hr />
+      <button onClick={logout}>Log out</button>
     </>
   )
 }
 
-export default index
+export default Dashboard
