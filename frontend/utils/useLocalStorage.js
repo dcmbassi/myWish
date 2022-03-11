@@ -9,7 +9,8 @@ const useLocalStorage = (key, initialValue) => {
         let jsonValue
         if (typeof window !== 'undefined') {
             jsonValue = localStorage.getItem(prefixedKey)
-            if (jsonValue) return JSON.parse(jsonValue)
+            if (jsonValue && typeof jsonValue === 'string') return jsonValue
+            if (jsonValue && typeof jsonValue === 'string') return JSON.parse(jsonValue)
             if (typeof initialValue === 'function') return initialValue()
             else return initialValue
         }

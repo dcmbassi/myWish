@@ -74,6 +74,20 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 })
 
+/*
+  @desc     Confirm locally stored token corresponds to locally saved user
+  @route    POST /api/users/check
+  @access   Private
+*/
+const checkClientUser = asyncHandler(async (req, res) => {
+    if (!req.user) {
+        res.status(401)
+        throw new Error('Token does not match user')
+    } else {
+        res.status(200).json(req.user)
+    }
+})
+
 
 /*
   @desc     Add target user to following list and add self to target follower list
@@ -199,6 +213,7 @@ const generateToken = (id) => {
 module.exports = {
     registerUser,
     loginUser,
+    checkClientUser,
     followUser,
     unfollowAll,
     unfollowOne
