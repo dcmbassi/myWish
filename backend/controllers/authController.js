@@ -88,7 +88,15 @@ const loginUser = asyncHandler(async (req, res) => {
   @access   Private
 */
 const logoutUser = asyncHandler(async (req, res) => {
-    // TODO: Implement logout logic
+    if (req.user) {
+        res
+            .status(200)
+            .cookie('__refresh_token', '', {maxAge: 0})
+            .json({message: 'Logout ok'})
+    } else {
+        res.status(500)
+        throw new Error('Unexpected server error')
+    }
 })
 
 /*
@@ -98,13 +106,13 @@ const logoutUser = asyncHandler(async (req, res) => {
 */
 const refreshToken = asyncHandler(async (req, res) => {
     if (req.user) {
-        res
-            .status(200)
-            .cookie('__refresh_token', '', {maxAge: 0})
-            .json({message: 'Logout ok'})
-    } else {
-        res.status(500)
-        throw new Error('Unexpected server error')
+        res.status(200).json({
+            _id: req.user.id,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            email: req.user.email,
+            token: generateAuthToken(req.user._id)
+        })
     }
 })
 

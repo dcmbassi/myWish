@@ -44,13 +44,13 @@ const verifyRefreshToken = asyncHandler(async (req, res, next) => {
     const {headers: {cookie}} = req
     if (cookie) {
         const cookies = cookie.split(';').reduce((acc, current) => {
-            const [key, value] = current.trim().split('=')
-            return {...acc, key: value}
+            const [index, value] = current.trim().split('=')
+            return {...acc, [index]: value}
         }, {})
         const refreshToken = cookies.__refresh_token
         try {
             const decoded = jwt.decode(refreshToken, process.env.JWT_REFRESH_SECRET)
-            const user = User.findById(decoded.id)
+            const user = await User.findById(decoded.id)
             if (user) {
                 req.user = user
                 next()
