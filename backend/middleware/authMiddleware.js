@@ -5,7 +5,6 @@ const Wish = require('../models/wishModel')
 
 const verifyToken = asyncHandler(async (req, res, next) => {
     let token
-
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
             token = req.headers.authorization.split(' ')[1]
@@ -33,48 +32,14 @@ const verifyWishOwnership = asyncHandler(async (req, res, next) => {
         } else {
             next()
         }
-
     } else {
         res.status(400)
         throw new Error('Missing wish reference')
     }
 })
 
-const verifyRefreshToken = asyncHandler(async (req, res, next) => {
-    const {headers: {cookie}} = req
-    if (cookie) {
-        const cookies = cookie.split(';').reduce((acc, current) => {
-            const [index, value] = current.trim().split('=')
-            return {...acc, [index]: value}
-        }, {})
-        const refreshToken = cookies.__refresh_token
-        try {
-            const decoded = jwt.decode(refreshToken, process.env.JWT_REFRESH_SECRET)
-            const user = await User.findById(decoded.id)
-            if (user) {
-                req.user = user
-                next()
-            } else {
-                res.status(400)
-                throw new Error('User not found')
-            }
-        } catch (error) {
-            if (error instanceof jwt.TokenExpiredError) {
-                res.status(401)
-                throw new Error('Refresh token expired')
-            } else {
-                res.status(500)
-                throw new Error('A server error has occurred')
-            }
-        }
-    } else {
-        res.status(400)
-        throw new Error('Missing headers')
-    }
-})
 
 module.exports = {
     verifyToken,
-    verifyRefreshToken,
     verifyWishOwnership
 }

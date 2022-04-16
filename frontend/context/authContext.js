@@ -2,8 +2,10 @@ import { createContext, useContext, useState } from "react";
 import axios from 'axios'
 import useLocalStorage from "../utils/useLocalStorage";
 
-const loginURL = 'http://localhost:5000/api/users/login'
-const checkURL = 'http://localhost:5000/api/users/check'
+const loginURL = '/api/auth/login'
+const logoutURL = '/api/auth/logout'
+const refreshURL = '/api/auth/refresh'
+
 
 const authContext = createContext()
 
@@ -11,15 +13,21 @@ export const useAuth = () => useContext(authContext)
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
+    const [token, setToken] = useState(null)
+    const [tokenLife, setTokenLife] = useState(null)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [loading, setLoading] = useState(false)
     const [storedUser, setStoredUser, clearStoredUser] = useLocalStorage('user')
 
+    // Use localStorage the way it's usually done
     const login = async (email, password) => {
         setLoading(true)
         try {
             const {data} = await axios.post(loginURL, { email, password })
             const fetchedUser = {id: data._id, firstName: data.firstName, lastName: data.lastName, email: data.email}
+            setToken(data.token)
+            setTokenLife(data.tokenLife)
+            console.log(data.tokenLife)
             setUser(fetchedUser)
             setStoredUser(data)
             setIsLoggedIn(true)
@@ -29,30 +37,51 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    const logout = () => {
-        setIsLoggedIn(false)
-        clearStoredUser()
-        setUser(null)
+    // Revert to a regular logout pattern
+    const logout = async () => {
+        await axios.post(logoutURL, {}, {headers: {Authorization: `Bearer ${token}`}})
+        clearState()
     }
 
-    const checkStoredUser = async () => {
-        if (storedUser._id && !user) {
+    const refreshAccess = async () => {
+        try {
+            const {data} = await axios.post(refreshURL, {}, {
+                withCredentials: true,
+                headers: {
+                    'Access-Control-Allow-Origin': 'localhost:3000',
+                    'Content-Type': 'application/json',
+                }
+            
+            })
+            const fetchedUser = {id: data._id, firstName: data.firstName, lastName: data.lastName, email: data.email}
+            setToken(data.token)
+            setTokenLife(data.tokenLife)
+            setUser(fetchedUser)
+            setStoredUser(data)
+            setIsLoggedIn(true)
 
-            const restoredUser = {id: storedUser._id, firstName: storedUser.firstName, lastName: storedUser.lastName, email: storedUser.email}
-            const {data} = await axios.post(checkURL, {}, {headers:  {'Authorization': `Bearer ${storedUser.token}`}})
-            if (data._id === restoredUser.id) {
-                setUser(restoredUser)
-                setIsLoggedIn(true)
-                return true
-            } else return false
+            // Silent refresh
+            setTimeout(() => {
+                refreshAccess()
+            }, tokenLife - 500);
+        } catch (error) {
+            console.log(error)
         }
     }
+
+    const clearState = () => {
+        setUser(null)
+        setToken(null)
+        setTokenLife(null)
+        setIsLoggedIn(false)
+    }
+
 
     const value = {
         user,
         login,
         logout,
-        checkStoredUser,
+        refreshAccess,
         loading,
         isLoggedIn,
     }

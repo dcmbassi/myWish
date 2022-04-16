@@ -3,11 +3,13 @@ import { useEffect } from "react"
 import { useAuth } from "../../context/authContext"
 
 const Dashboard = () => {
-  const { user, logout, checkStoredUser } = useAuth()
+  const { user, logout, refreshAccess } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    checkStoredUser()
+    if (!user) {
+      refreshAccess()
+    }
   }, [])
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const Dashboard = () => {
       <h1>Dashboard</h1>
       {user && (<p>Welcome, {user.firstName} {user.lastName}</p>)}
       <hr />
-      <button onClick={logout}>Log out</button>
+      <button onClick={() =>logout()}>Log out</button>
     </>
   )
 }

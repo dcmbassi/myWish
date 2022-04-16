@@ -34,15 +34,12 @@ const registerUser = asyncHandler(async (req, res) => {
     if (user) {
         res
             .status(201)
-            .cookie('__refresh_token', generateRefreshToken(user.id), {
-                httpOnly: true
-            })
             .json({
                 _id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                token: generateAuthToken(user._id)
+                token: generateAuthToken(user._id),
             })
     } else {
         res.status(400)
@@ -66,15 +63,12 @@ const loginUser = asyncHandler(async (req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
         res
             .status(200)
-            .cookie('__refresh_token', generateRefreshToken(user.id), {
-                httpOnly: true
-            })
             .json({
                 _id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                token: generateAuthToken(user._id)
+                token: generateAuthToken(user._id),
             })
     } else {
         res.status(400)
@@ -91,28 +85,10 @@ const logoutUser = asyncHandler(async (req, res) => {
     if (req.user) {
         res
             .status(200)
-            .cookie('__refresh_token', '', {maxAge: 0})
             .json({message: 'Logout ok'})
     } else {
         res.status(500)
         throw new Error('Unexpected server error')
-    }
-})
-
-/*
-  @desc     Refresh auth token
-  @route    POST /api/auth/refresh
-  @access   Private
-*/
-const refreshToken = asyncHandler(async (req, res) => {
-    if (req.user) {
-        res.status(200).json({
-            _id: req.user.id,
-            firstName: req.user.firstName,
-            lastName: req.user.lastName,
-            email: req.user.email,
-            token: generateAuthToken(req.user._id)
-        })
     }
 })
 
@@ -122,15 +98,8 @@ const generateAuthToken = (id) => {
     })
 }
 
-const generateRefreshToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, {
-        expiresIn: process.env.REFRESH_TOKEN_LIFESPAN
-    })
-}
-
 module.exports = {
     registerUser,
     loginUser,
-    logoutUser,
-    refreshToken
+    logoutUser
 }
