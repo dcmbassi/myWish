@@ -7,11 +7,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState('')
 
     const router = useRouter()
-    const {user, login, isLoggedIn, refreshAccess} = useAuth()
-
-    useEffect(() => {
-        refreshAccess()
-    }, [])
+    const {user, login, isLoggedIn} = useAuth()
 
     useEffect(() => {
         user?.email && router.push('/dashboard')

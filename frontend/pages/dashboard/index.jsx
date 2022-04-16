@@ -3,14 +3,8 @@ import { useEffect } from "react"
 import { useAuth } from "../../context/authContext"
 
 const Dashboard = () => {
-  const { user, logout, refreshAccess } = useAuth()
+  const { user, logout } = useAuth()
   const router = useRouter()
-
-  useEffect(() => {
-    if (!user) {
-      refreshAccess()
-    }
-  }, [])
 
   useEffect(() => {
     if (!user) router.push('/login')
